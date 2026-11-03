@@ -26,11 +26,17 @@ export const metadata: Metadata = {
 }
 
 export const viewport: Viewport = {
-  colorScheme: 'light',
-  themeColor: [
-    { media: '(prefers-color-scheme: light)', color: '#F3F1EC' },
-  ],
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 5,
+  colorScheme: 'dark',
+  themeColor: '#0a0709',
 }
+
+import { StoreProvider } from '@/context/store-context'
+import { CartDrawer } from '@/components/ui/cart-drawer'
+import { SearchModal } from '@/components/ui/search-modal'
+import { ToastNotification } from '@/components/ui/toast-notification'
 
 export default function RootLayout({
   children,
@@ -53,8 +59,13 @@ export default function RootLayout({
           type="video/mp4"
         />
       </head>
-      <body className="antialiased">
-        {children}
+      <body className="antialiased bg-[#0a0709] text-white">
+        <StoreProvider>
+          {children}
+          <CartDrawer />
+          <SearchModal />
+          <ToastNotification />
+        </StoreProvider>
         {process.env.NODE_ENV === 'production' && <Analytics />}
       </body>
     </html>

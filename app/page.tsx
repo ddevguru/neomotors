@@ -1,9 +1,15 @@
 'use client'
 
 import { useEffect, useRef, useState, type ReactNode } from 'react'
-import { motion, useScroll, useTransform, useInView } from 'framer-motion'
+import Link from 'next/link'
+import { motion, useScroll, useTransform, useInView, useSpring } from 'framer-motion'
 import { gsap } from 'gsap'
 import { ArrowDown, ArrowRight, Heart, Menu, Search, ShoppingBag, UserRound, X } from 'lucide-react'
+import ScrollMorphHero from '@/components/ui/scroll-morph-hero'
+import { CinematicFooter } from '@/components/ui/motion-footer'
+import { Navbar } from '@/components/ui/navbar'
+import { useStore } from '@/context/store-context'
+import { PRODUCTS, BRANDS } from '@/lib/data'
 
 const products = [
   { name: 'Porsche 911 GT3 RS', brand: 'MINI GT', price: '₹1,899', image: 'https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=900&q=85', tag: 'EDITORIAL PICK' },
@@ -15,6 +21,7 @@ const products = [
 const collections = [
   {
     number: '01',
+    id: 'european-icons',
     tag: 'CONTINENTAL PRESTIGE',
     badge: '12 ARCHIVE MODELS',
     title: 'European Icons',
@@ -24,6 +31,7 @@ const collections = [
   },
   {
     number: '02',
+    id: 'jdm-legends',
     tag: 'MIDNIGHT TOKYO',
     badge: '16 CULT EDITIONS',
     title: 'JDM Legends',
@@ -33,6 +41,7 @@ const collections = [
   },
   {
     number: '03',
+    id: 'detroit-muscle',
     tag: 'DETROIT STEEL',
     badge: '10 V8 LEGENDS',
     title: 'American Muscle',
@@ -54,26 +63,32 @@ const brandTiles = [
 ]
 
 function Reveal({ children, className = '', delay = 0 }: { children: ReactNode; className?: string; delay?: number }) {
-  return <motion.div className={`reveal-block ${className}`} initial={{ opacity: 0, y: 34, clipPath: 'inset(0 0 100% 0)' }} whileInView={{ opacity: 1, y: 0, clipPath: 'inset(0 0 0% 0)' }} viewport={{ once: false, amount: 0.25 }} transition={{ duration: 0.85, delay, ease: [0.22, 1, 0.36, 1] }}>{children}</motion.div>
+  return (
+    <motion.div
+      className={`reveal-block ${className}`}
+      initial={{ opacity: 0, y: 34, clipPath: 'inset(0 0 100% 0)' }}
+      whileInView={{ opacity: 1, y: 0, clipPath: 'inset(0 0 0% 0)' }}
+      viewport={{ once: true, amount: 0.15 }}
+      transition={{ duration: 0.85, delay, ease: [0.22, 1, 0.36, 1] }}
+    >
+      {children}
+    </motion.div>
+  )
 }
 
 export default function Page() {
-  const [menuOpen, setMenuOpen] = useState(false)
-  const [cartCount, setCartCount] = useState(0)
-  const [liked, setLiked] = useState<number[]>([])
-  const [cursor, setCursor] = useState({ x: -100, y: -100 })
+  const { cartCount, addToCart, toggleWishlist, isWishlisted, showNotification } = useStore()
   const heroRef = useRef<HTMLElement>(null)
   const videoRef = useRef<HTMLVideoElement>(null)
   const introRef = useRef<HTMLElement>(null)
   const isIntroInView = useInView(introRef, { amount: 0.2, once: false })
   const { scrollYProgress } = useScroll({ target: heroRef, offset: ['start start', 'end start'] })
-  const heroY = useTransform(scrollYProgress, [0, 1], ['0%', '28%'])
+  const heroY = useTransform(scrollYProgress, [0, 1], ['0%', '15%'])
+  const { scrollYProgress: pageScrollProgress } = useScroll()
+  const scrollIndicatorX = useSpring(pageScrollProgress, { stiffness: 140, damping: 28, restDelta: 0.001 })
+  const watermarkY = useTransform(pageScrollProgress, [0, 1], ['0%', '35%'])
 
   useEffect(() => {
-    const stored = window.localStorage.getItem('neomotors-cart')
-    if (stored) setCartCount(Number(stored))
-    const move = (event: MouseEvent) => setCursor({ x: event.clientX, y: event.clientY })
-    window.addEventListener('mousemove', move)
     const magnetic = gsap.utils.toArray<HTMLElement>('[data-magnetic]')
     magnetic.forEach((item) => {
       item.addEventListener('mouseenter', () => gsap.to(item, { y: -3, duration: 0.35, ease: 'power2.out' }))
@@ -95,22 +110,11 @@ export default function Page() {
         video.addEventListener('canplay', startPlayback, { once: true })
       }
     }
-
-    return () => window.removeEventListener('mousemove', move)
   }, [])
-
-  const addToCart = () => {
-    const next = cartCount + 1
-    setCartCount(next)
-    window.localStorage.setItem('neomotors-cart', String(next))
-  }
-
-  const toggleLike = (index: number) => setLiked((current) => current.includes(index) ? current.filter((item) => item !== index) : [...current, index])
 
   return (
     <main className="site-shell">
-      <motion.div className="cursor-dot" animate={{ x: cursor.x - 4, y: cursor.y - 4 }} transition={{ type: 'spring', stiffness: 500, damping: 35 }} />
-      <div className="cursor-ring" style={{ transform: `translate3d(${cursor.x - 19}px, ${cursor.y - 19}px, 0)` }} />
+      <motion.div className="page-scroll-bar" style={{ scaleX: scrollIndicatorX }} />
       <section ref={heroRef} className="hero">
         <motion.video
           ref={videoRef}
@@ -144,30 +148,28 @@ export default function Page() {
           <source src="/14451237_3840_2160_30fps.mp4" type="video/mp4" />
         </motion.video>
         <div className="hero-wash" />
-        <nav className="nav-bar" aria-label="Primary navigation">
-          <a href="#top" className="wordmark">NEO<span>/</span>MOTORS</a>
-          <div className="nav-links">
-            {['Home', 'Shop', 'Collections', 'Brands', 'New Arrivals', 'Pre-Orders'].map((item) => <a key={item} href={`#${item.toLowerCase().replace('-', '')}`}>{item}</a>)}
-          </div>
-          <div className="nav-actions">
-            <button aria-label="Search" data-magnetic><Search /></button><button aria-label="Wishlist" data-magnetic><Heart /></button><button aria-label="Account" data-magnetic><UserRound /></button><button className="cart-button" aria-label={`Cart with ${cartCount} items`} data-magnetic><ShoppingBag /><span>{String(cartCount).padStart(2, '0')}</span></button>
-            <button className="menu-trigger" onClick={() => setMenuOpen(!menuOpen)} aria-label="Open menu">{menuOpen ? <X /> : <Menu />}</button>
-          </div>
-        </nav>
-        {menuOpen && <motion.div initial={{ opacity: 0, y: -12 }} animate={{ opacity: 1, y: 0 }} className="mobile-menu">{['Home', 'Shop', 'Collections', 'Brands', 'New Arrivals', 'Pre-Orders'].map((item) => <a key={item} href={`#${item.toLowerCase().replace('-', '')}`} onClick={() => setMenuOpen(false)}>{item}</a>)}</motion.div>}
+        <Navbar isHero={true} />
         <div className="hero-content" id="top">
           <p className="eyebrow light">THE ART OF MINIATURE AUTOMOTIVE</p>
           <h1>Small scale.<br /><em>Timeless machines.</em></h1>
           <p className="hero-copy">Discover legendary automotive icons, premium diecast collectibles and miniature machines made for enthusiasts.</p>
-          <div className="hero-ctas"><a href="#shop" className="button button-light" data-magnetic>Explore collection <ArrowRight /></a><a href="#new arrivals" className="text-link light" data-magnetic>Discover new arrivals <ArrowDown /></a></div>
+          <div className="hero-ctas">
+            <Link href="/collections" className="button button-light" data-magnetic>
+              Explore collection <ArrowRight />
+            </Link>
+            <a href="#vault" className="text-link light" data-magnetic>
+              Explore 3D Vault <ArrowDown />
+            </a>
+          </div>
         </div>
-        <div className="hero-meta"><span>SCROLL TO EXPLORE</span><span>EST. 2024 / INDIA</span><span>01 — 04</span></div>
+        <div className="hero-meta"><span>SCROLL TO EXPLORE</span><span>EST. 2024 / INDIA</span><span>01 — 05</span></div>
       </section>
 
-      <section ref={introRef} className="intro-section section-pad" id="collections">
+      <section ref={introRef} className="intro-section section-pad" id="home-intro">
         <motion.div
           className="intro-watermark"
           aria-hidden="true"
+          style={{ y: watermarkY }}
           animate={isIntroInView ? { opacity: 0.035, scale: 1 } : { opacity: 0, scale: 0.96 }}
           transition={{ duration: 1.1, ease: [0.22, 1, 0.36, 1] }}
         >
@@ -301,15 +303,27 @@ export default function Page() {
         </motion.div>
       </section>
 
-      <section className="collection-section section-pad" id="selection">
+      {/* 3D INTERACTIVE SPECIMEN VAULT */}
+      <section className="vault-morph-section" id="vault">
+        <div className="vault-kicker-bar">
+          <div className="section-kicker" style={{ margin: '0 auto', maxWidth: '1360px', padding: '0 6vw' }}>
+            <strong>02</strong>
+            <span>3D SPECIMEN VAULT</span>
+            <span>SCROLL TO MORPH • HOVER TO 3D FLIP</span>
+          </div>
+        </div>
+        <ScrollMorphHero />
+      </section>
+
+      <section className="collection-section section-pad" id="collections">
         <motion.div
           className="section-kicker"
-          initial={{ opacity: 0, y: 16 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: false, amount: 0.2 }}
-          transition={{ duration: 0.6 }}
+          initial={{ opacity: 0, y: 24, filter: 'blur(4px)' }}
+          whileInView={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+          viewport={{ once: true, amount: 0.15 }}
+          transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
         >
-          <strong>02</strong>
+          <strong>03</strong>
           <span>CURATED EDITIONS</span>
           <span>THE THREE PILLARS OF AUTOMOTIVE ART</span>
         </motion.div>
@@ -317,10 +331,10 @@ export default function Page() {
         <div className="collection-header">
           <motion.div
             className="collection-editorial"
-            initial={{ opacity: 0, y: 24 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: false, amount: 0.2 }}
-            transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+            initial={{ opacity: 0, y: 45, filter: 'blur(6px)' }}
+            whileInView={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+            viewport={{ once: true, amount: 0.2 }}
+            transition={{ duration: 1.4, ease: [0.16, 1, 0.3, 1] }}
           >
             <div className="collection-badge">
               <span className="badge-dot" />
@@ -337,10 +351,10 @@ export default function Page() {
 
           <motion.div
             className="collection-header-meta"
-            initial={{ opacity: 0, y: 24 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: false, amount: 0.2 }}
-            transition={{ duration: 0.7, delay: 0.12, ease: [0.22, 1, 0.36, 1] }}
+            initial={{ opacity: 0, y: 45, filter: 'blur(6px)' }}
+            whileInView={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+            viewport={{ once: true, amount: 0.2 }}
+            transition={{ duration: 1.4, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
           >
             <div className="collection-meta-strip">
               <div className="meta-strip-item">
@@ -362,58 +376,125 @@ export default function Page() {
             </div>
 
             <div className="collection-pill-tabs">
-              <a href="#shop" className="collection-pill-tab active">
+              <Link href="/collections/european-icons" className="collection-pill-tab active">
                 <span>01</span> European Icons <em>12</em>
-              </a>
-              <a href="#shop" className="collection-pill-tab">
+              </Link>
+              <Link href="/collections/jdm-legends" className="collection-pill-tab">
                 <span>02</span> JDM Midnight <em>16</em>
-              </a>
-              <a href="#shop" className="collection-pill-tab">
+              </Link>
+              <Link href="/collections/detroit-muscle" className="collection-pill-tab">
                 <span>03</span> Detroit Muscle <em>10</em>
-              </a>
+              </Link>
             </div>
           </motion.div>
         </div>
 
-        <div className="collection-grid">
+        <div className="collection-grid perspective-container">
           {collections.map((collection, index) => (
-            <motion.a
+            <motion.div
               key={collection.number}
-              href="#shop"
               className={`collection-card card-${index + 1}`}
-              initial={{ opacity: 0, y: 35 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: false, amount: 0.15 }}
-              whileHover={{ y: -8 }}
-              transition={{ duration: 0.65, delay: index * 0.1, ease: [0.22, 1, 0.36, 1] }}
+              initial={{ opacity: 0, y: 55, filter: 'blur(8px)', scale: 0.96 }}
+              whileInView={{ opacity: 1, y: 0, filter: 'blur(0px)', scale: 1 }}
+              viewport={{ once: true, amount: 0.15 }}
+              whileHover={{
+                y: -10,
+                rotateX: 4,
+                rotateY: index === 0 ? 3 : index === 1 ? -2 : 3,
+                scale: 1.015,
+              }}
+              transition={{ duration: 1.35, delay: index * 0.18, ease: [0.16, 1, 0.3, 1] }}
             >
-              <img src={collection.image} alt={collection.title} />
-              <div className="card-overlay" />
-              <div className="card-top-tags">
-                <span className="card-category-tag">{collection.tag}</span>
-                <span className="card-badge-pill">{collection.badge}</span>
-              </div>
-              <div className="card-content-wrap">
-                <div className="card-marques-chip">
-                  <span>MARQUES //</span> {collection.marques}
+              <Link href={`/collections/${collection.id}`} className="block w-full h-full text-inherit">
+                <img src={collection.image} alt={collection.title} />
+                <div className="card-overlay" />
+                <div className="card-top-tags">
+                  <span className="card-category-tag">{collection.tag}</span>
+                  <span className="card-badge-pill">{collection.badge}</span>
                 </div>
-                <div className="collection-label">
-                  <span className="collection-num">{collection.number}</span>
-                  <div className="collection-info">
-                    <h3>{collection.title}</h3>
-                    <p>{collection.copy}</p>
+                <div className="card-content-wrap">
+                  <div className="card-marques-chip">
+                    <span>MARQUES //</span> {collection.marques}
                   </div>
-                  <div className="collection-arrow-circle">
-                    <ArrowRight />
+                  <div className="collection-label">
+                    <span className="collection-num">{collection.number}</span>
+                    <div className="collection-info">
+                      <h3>{collection.title}</h3>
+                      <p>{collection.copy}</p>
+                    </div>
+                    <div className="collection-arrow-circle">
+                      <ArrowRight />
+                    </div>
                   </div>
                 </div>
-              </div>
-            </motion.a>
+              </Link>
+            </motion.div>
           ))}
         </div>
       </section>
 
-      <section className="products-section section-pad" id="shop"><div className="section-kicker"><strong>03</strong><span>SHOP THE EDIT</span><span>THE FINEST IN SCALE.</span></div><div className="products-heading"><h2>Considered<br /><em>collectibles.</em></h2><a href="#shop" className="text-link">View all models <ArrowRight /></a></div><div className="product-grid">{products.map((product, index) => <motion.article className="product-card" key={product.name} initial={{ opacity: 0, y: 42 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: false, amount: .2 }} transition={{ duration: .65, delay: index * .08, ease: [0.22, 1, 0.36, 1] }}><div className="product-image"><img src={product.image} alt={product.name} /><span className="product-tag">{product.tag}</span><button className={`like-button ${liked.includes(index) ? 'liked' : ''}`} onClick={() => toggleLike(index)} aria-label="Add to wishlist"><Heart /></button><div className="quick-add"><button onClick={addToCart}>Add to collection <ArrowRight /></button></div></div><div className="product-info"><div><p className="product-brand">{product.brand}</p><h3>{product.name}</h3></div><strong>{product.price}</strong></div></motion.article>)}</div></section>
+      <section className="products-section section-pad" id="shop">
+        <div className="section-kicker">
+          <strong>04</strong>
+          <span>SHOP THE EDIT</span>
+          <span>THE FINEST IN SCALE.</span>
+        </div>
+        <div className="products-heading">
+          <h2>Considered<br /><em>collectibles.</em></h2>
+          <Link href="/catalog" className="text-link">View all models <ArrowRight /></Link>
+        </div>
+        <div className="product-grid perspective-container">
+          {products.map((product, index) => {
+            const productData = PRODUCTS[index] || PRODUCTS[0]
+            const liked = isWishlisted(productData.id)
+
+            return (
+              <motion.article
+                className="product-card"
+                key={product.name}
+                initial={{ opacity: 0, y: 45, filter: 'blur(6px)' }}
+                whileInView={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+                viewport={{ once: true, amount: 0.15 }}
+                whileHover={{
+                  y: -8,
+                  rotateX: 3,
+                  rotateY: index % 2 === 0 ? 2 : -2,
+                  scale: 1.015,
+                }}
+                transition={{ duration: 1.25, delay: index * 0.12, ease: [0.16, 1, 0.3, 1] }}
+              >
+                <div className="product-image">
+                  <Link href={`/product/${productData.slug}`} className="block w-full h-full">
+                    <img src={product.image} alt={product.name} />
+                  </Link>
+                  <span className="product-tag">{product.tag}</span>
+                  <button
+                    className={`like-button ${liked ? 'liked' : ''}`}
+                    onClick={() => toggleWishlist(productData.id)}
+                    aria-label="Add to wishlist"
+                  >
+                    <Heart className={liked ? 'fill-[#ff99ac] text-[#ff99ac]' : ''} />
+                  </button>
+                  <div className="quick-add">
+                    <button onClick={() => addToCart(productData, 1)}>Add to collection <ArrowRight /></button>
+                  </div>
+                </div>
+                <div className="product-info">
+                  <div>
+                    <p className="product-brand">{product.brand}</p>
+                    <h3>
+                      <Link href={`/product/${productData.slug}`} className="hover:text-[#ff99ac] transition-colors">
+                        {product.name}
+                      </Link>
+                    </h3>
+                  </div>
+                  <strong>{product.price}</strong>
+                </div>
+              </motion.article>
+            )
+          })}
+        </div>
+      </section>
 
       <section className="brand-section" id="brands">
         <div className="brand-watermark" aria-hidden="true">MARQUES</div>
@@ -426,7 +507,7 @@ export default function Page() {
             viewport={{ once: false, amount: 0.2 }}
             transition={{ duration: 0.6 }}
           >
-            <strong>04</strong>
+            <strong>05</strong>
             <span>THE MAKER&apos;S CIRCLE</span>
             <span>CURATED GLOBAL DIECAST MARQUES</span>
           </motion.div>
@@ -434,10 +515,10 @@ export default function Page() {
           <div className="brand-grid">
             <motion.div
               className="brand-editorial"
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: false, amount: 0.2 }}
-              transition={{ duration: 0.75, ease: [0.22, 1, 0.36, 1] }}
+              initial={{ opacity: 0, y: 35, filter: 'blur(5px)' }}
+              whileInView={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+              viewport={{ once: true, amount: 0.2 }}
+              transition={{ duration: 1.35, ease: [0.16, 1, 0.3, 1] }}
             >
               <div className="brand-badge">
                 <span>✦ OFFICIAL PARTNER VAULT • 9 MARQUES</span>
@@ -467,19 +548,21 @@ export default function Page() {
               {brandTiles.map((brand, index) => (
                 <motion.div
                   key={brand.name}
-                  className="brand-tile"
-                  initial={{ opacity: 0, y: 25 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: false, amount: 0.15 }}
-                  transition={{ duration: 0.5, delay: index * 0.08, ease: [0.22, 1, 0.36, 1] }}
-                  whileHover={{ y: -5, scale: 1.02 }}
+                  className="brand-tile cursor-pointer"
+                  initial={{ opacity: 0, y: 30, filter: 'blur(5px)' }}
+                  whileInView={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+                  viewport={{ once: true, amount: 0.15 }}
+                  transition={{ duration: 1.15, delay: index * 0.1, ease: [0.16, 1, 0.3, 1] }}
+                  whileHover={{ y: -6, rotateX: 3, rotateY: -2, scale: 1.025 }}
                 >
-                  <div className="brand-tile-header">
-                    <span className="brand-tile-origin">{brand.origin}</span>
-                    <span className="brand-tile-dot" />
-                  </div>
-                  <h3>{brand.name}</h3>
-                  <p>{brand.desc}</p>
+                  <Link href={`/catalog?brand=${encodeURIComponent(brand.name)}`} className="block w-full h-full text-inherit">
+                    <div className="brand-tile-header">
+                      <span className="brand-tile-origin">{brand.origin}</span>
+                      <span className="brand-tile-dot" />
+                    </div>
+                    <h3>{brand.name}</h3>
+                    <p>{brand.desc}</p>
+                  </Link>
                 </motion.div>
               ))}
             </div>
@@ -506,7 +589,7 @@ export default function Page() {
           viewport={{ once: false, amount: 0.2 }}
           transition={{ duration: 0.6 }}
         >
-          <strong>05</strong>
+          <strong>06</strong>
           <span>THE PHILOSOPHY</span>
           <span>THE ART OF SCALE & CRAFTSMANSHIP</span>
         </motion.div>
@@ -514,10 +597,10 @@ export default function Page() {
         <div className="story-container">
           <motion.div
             className="story-image-wrap"
-            initial={{ opacity: 0, x: -80 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: false, amount: 0.2 }}
-            transition={{ duration: 0.85, ease: [0.22, 1, 0.36, 1] }}
+            initial={{ opacity: 0, x: -50, filter: 'blur(4px)' }}
+            whileInView={{ opacity: 1, x: 0, filter: 'blur(0px)' }}
+            viewport={{ once: true, amount: 0.2 }}
+            transition={{ duration: 1.25, ease: [0.16, 1, 0.3, 1] }}
           >
             <div className="story-image-frame">
               <img
@@ -545,10 +628,10 @@ export default function Page() {
 
           <motion.div
             className="story-editorial"
-            initial={{ opacity: 0, x: 80 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: false, amount: 0.2 }}
-            transition={{ duration: 0.85, delay: 0.12, ease: [0.22, 1, 0.36, 1] }}
+            initial={{ opacity: 0, x: 50, filter: 'blur(4px)' }}
+            whileInView={{ opacity: 1, x: 0, filter: 'blur(0px)' }}
+            viewport={{ once: true, amount: 0.2 }}
+            transition={{ duration: 1.25, delay: 0.12, ease: [0.16, 1, 0.3, 1] }}
           >
             <div className="story-badge">
               <span className="badge-dot" />
@@ -599,12 +682,12 @@ export default function Page() {
             </div>
 
             <div className="story-ctas">
-              <a href="#shop" className="button button-dark" data-magnetic>
+              <Link href="/catalog" className="button button-dark" data-magnetic>
                 Explore the collection <ArrowRight />
-              </a>
-              <a href="#brands" className="text-link" data-magnetic>
+              </Link>
+              <Link href="/brands" className="text-link" data-magnetic>
                 View our marques <ArrowRight />
-              </a>
+              </Link>
             </div>
           </motion.div>
         </div>
@@ -615,10 +698,10 @@ export default function Page() {
         <div className="cta-container">
           <motion.div
             className="cta-editorial"
-            initial={{ opacity: 0, x: -40 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: false, amount: 0.15 }}
-            transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+            initial={{ opacity: 0, y: 40, filter: 'blur(6px)' }}
+            whileInView={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+            viewport={{ once: true, amount: 0.2 }}
+            transition={{ duration: 1.4, ease: [0.16, 1, 0.3, 1] }}
           >
             <div className="cta-badge">
               <span className="badge-dot" />
@@ -649,21 +732,21 @@ export default function Page() {
             </div>
 
             <div className="cta-actions">
-              <a href="#shop" className="button button-light" data-magnetic>
+              <Link href="/catalog?filter=new" className="button button-light" data-magnetic>
                 Explore New Arrivals <ArrowRight />
-              </a>
-              <a href="#selection" className="cta-secondary-link" data-magnetic>
+              </Link>
+              <Link href="/collections" className="cta-secondary-link" data-magnetic>
                 View Curated Editions <ArrowRight />
-              </a>
+              </Link>
             </div>
           </motion.div>
 
           <motion.div
             className="cta-car-showcase"
-            initial={{ opacity: 0, x: 40 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: false, amount: 0.15 }}
-            transition={{ duration: 0.7, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
+            initial={{ opacity: 0, y: 40, scale: 0.96, filter: 'blur(6px)' }}
+            whileInView={{ opacity: 1, y: 0, scale: 1, filter: 'blur(0px)' }}
+            viewport={{ once: true, amount: 0.2 }}
+            transition={{ duration: 1.5, delay: 0.18, ease: [0.16, 1, 0.3, 1] }}
           >
             <div className="cta-car-card">
               <div className="cta-car-stage">
@@ -705,7 +788,7 @@ export default function Page() {
           </motion.div>
         </div>
       </section>
-      <footer className="footer"><a href="#top" className="wordmark">NEO<span>/</span>MOTORS</a><p>THE ART OF MINIATURE AUTOMOTIVE</p><div><a href="#shop">Shop</a><a href="#brands">Brands</a><a href="#collections">Journal</a><a href="#top">Instagram</a></div><small>© 2024 NEOMOTORS. BUILT FOR THE OBSESSED.</small></footer>
+      <CinematicFooter />
     </main>
   )
 }

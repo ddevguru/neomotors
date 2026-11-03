@@ -57,6 +57,118 @@ button {
   cursor: pointer;
 }
 
+/* Luxury High-Contrast Button Utilities */
+.btn-primary-burgundy {
+  background: linear-gradient(135deg, #8A1538 0%, #5C1422 100%) !important;
+  color: #FFFFFF !important;
+  border: 1px solid rgba(255, 153, 172, 0.45) !important;
+  box-shadow: 0 4px 20px rgba(138, 21, 56, 0.4) !important;
+  transition: all 0.25s ease !important;
+}
+.btn-primary-burgundy:hover {
+  filter: brightness(1.18) !important;
+  box-shadow: 0 6px 26px rgba(138, 21, 56, 0.65) !important;
+}
+
+.btn-secondary-dark {
+  background: rgba(255, 255, 255, 0.08) !important;
+  color: #FFFFFF !important;
+  border: 1px solid rgba(255, 255, 255, 0.18) !important;
+  transition: all 0.25s ease !important;
+}
+.btn-secondary-dark:hover {
+  background: rgba(255, 255, 255, 0.18) !important;
+  color: #FFFFFF !important;
+  border-color: rgba(255, 255, 255, 0.35) !important;
+}
+
+.btn-pill-white,
+a.btn-pill-white,
+button.btn-pill-white {
+  background: #FFFFFF !important;
+  color: #000000 !important;
+  border: 1px solid #FFFFFF !important;
+  font-weight: 700 !important;
+}
+.btn-pill-white span,
+.btn-pill-white svg,
+a.btn-pill-white span,
+a.btn-pill-white svg {
+  color: #000000 !important;
+  stroke: #000000 !important;
+}
+.btn-pill-white:hover {
+  background: #ff99ac !important;
+  color: #000000 !important;
+  border-color: #ff99ac !important;
+}
+.btn-pill-white:hover span,
+.btn-pill-white:hover svg {
+  color: #000000 !important;
+  stroke: #000000 !important;
+}
+
+/* Ensure no inner span or text wrapper inside ANY button has border, background, or outline */
+.btn-primary-burgundy span,
+.btn-secondary-dark span,
+.btn-pill-white span,
+.btn-primary-burgundy > *,
+.btn-secondary-dark > *,
+.btn-pill-white > *,
+button span,
+a.button span,
+a span.btn-inner {
+  border: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+
+.page-scroll-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3.5px;
+  background: linear-gradient(90deg, #5c1422, #ff99ac, #7c1a2e);
+  transform-origin: 0%;
+  z-index: 99999;
+  box-shadow: 0 0 14px rgba(255, 153, 172, 0.75);
+  pointer-events: none;
+}
+
+.perspective-container {
+  perspective: 1200px;
+}
+
+.vault-morph-section {
+  position: relative;
+  background: #0e0c0b;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  overflow: hidden;
+}
+
+.vault-kicker-bar {
+  padding-top: 48px;
+  background: #0e0c0b;
+}
+
+.vault-kicker-bar .section-kicker {
+  border-color: rgba(255, 255, 255, 0.15);
+  color: rgba(255, 255, 255, 0.65);
+  margin-top: 0;
+}
+
+.vault-kicker-bar .section-kicker strong {
+  color: #ff99ac;
+}
+
+.vault-kicker-bar .section-kicker span:nth-child(2) {
+  color: #ffffff;
+}
+
 .site-shell {
   overflow: hidden;
   background: var(--paper);
@@ -72,6 +184,23 @@ button {
 
 .product-card {
   will-change: transform, opacity;
+  transform-style: preserve-3d;
+  transition: transform 0.45s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.45s ease;
+}
+
+.product-card:hover {
+  box-shadow: 0 24px 50px -10px rgba(14, 12, 11, 0.15), 0 0 25px rgba(92, 20, 34, 0.1);
+}
+
+.collection-card {
+  transform-style: preserve-3d;
+  will-change: transform, box-shadow;
+}
+
+.brand-tile {
+  transform-style: preserve-3d;
+  will-change: transform, box-shadow;
+  transition: transform 0.45s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.45s ease;
 }
 
 .story-image {
@@ -92,28 +221,7 @@ button {
   }
 }
 
-/* Custom interactive cursor */
-.cursor-dot, .cursor-ring {
-  position: fixed;
-  pointer-events: none;
-  z-index: 99;
-  mix-blend-mode: difference;
-}
-
-.cursor-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: #fff;
-}
-
-.cursor-ring {
-  width: 38px;
-  height: 38px;
-  border: 1px solid rgba(255, 255, 255, 0.7);
-  border-radius: 50%;
-  transition: transform 0.12s ease-out;
-}
+/* Global base optimizations */
 
 /* HERO SECTION */
 .hero {
@@ -192,12 +300,13 @@ button {
   font-weight: 800;
   letter-spacing: 0.2em;
   white-space: nowrap;
-  color: inherit;
+  color: #ffffff !important;
 }
 
-.wordmark span {
-  color: var(--burgundy);
-  padding: 0 4px;
+.wordmark span.wordmark-slash,
+.wordmark .slash {
+  color: #ff99ac !important;
+  padding: 0 2px;
 }
 
 .nav-links {
@@ -349,14 +458,16 @@ button {
 .button {
   display: inline-flex;
   align-items: center;
-  gap: 18px;
-  padding: 16px 24px;
+  justify-content: center;
+  gap: 14px;
+  padding: 15px 30px;
+  border-radius: 9999px !important;
   font-family: var(--font-mono);
   font-size: 11px;
   letter-spacing: 0.15em;
   text-transform: uppercase;
   font-weight: 700;
-  transition: background 0.35s, color 0.35s, box-shadow 0.35s, border-color 0.35s;
+  transition: all 0.35s ease;
 }
 
 .button svg,
@@ -373,29 +484,48 @@ button {
   transform: translateX(4px);
 }
 
+.button-light,
+.button-light span,
+.button-light svg {
+  background: #ffffff !important;
+  color: #0e0c0b !important;
+}
+
 .button-light {
-  background: #ffffff;
-  color: var(--ink);
-  border: 1px solid rgba(14, 12, 11, 0.12);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+  border-radius: 9999px !important;
+  border: 1px solid rgba(255, 255, 255, 0.6) !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35) !important;
+}
+
+.button-light:hover,
+.button-light:hover span,
+.button-light:hover svg {
+  background: #8A1538 !important;
+  color: #ffffff !important;
+  border-color: #ff99ac !important;
 }
 
 .button-light:hover {
-  background: var(--burgundy);
-  color: #fff;
-  border-color: var(--burgundy);
-  box-shadow: 0 8px 24px rgba(92, 20, 34, 0.35);
+  box-shadow: 0 8px 26px rgba(138, 21, 56, 0.55) !important;
 }
 
-.button-dark {
-  background: var(--ink);
-  color: #fff;
+.button-dark,
+.button-dark span,
+.button-dark svg {
+  background: var(--ink) !important;
+  color: #ffffff !important;
+  border-radius: 9999px !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
 }
 
-.button-dark:hover {
-  background: var(--burgundy);
-  color: #fff;
+.button-dark:hover,
+.button-dark:hover span,
+.button-dark:hover svg {
+  background: #8A1538 !important;
+  color: #ffffff !important;
+  border-color: #ff99ac !important;
 }
+
 
 .text-link {
   display: inline-flex;
@@ -1876,6 +2006,7 @@ button {
 /* CTA BANNER & SHOWCASE CAR */
 .cta-section {
   position: relative;
+  z-index: 10;
   background: radial-gradient(circle at 75% 45%, #2e0812 0%, #0c0f14 55%, #080a0e 100%);
   color: #fff;
   padding: 34px 6vw 38px;
@@ -2245,7 +2376,7 @@ button {
   color: var(--ink);
 }
 
-.footer .wordmark span {
+.footer .wordmark .slash {
   color: var(--burgundy);
 }
 
@@ -2279,148 +2410,223 @@ button {
   padding-top: 22px;
 }
 
-/* RESPONSIVE DESIGN */
-@media (max-width: 900px) {
-  .nav-links {
-    display: none;
+/* COMPREHENSIVE RESPONSIVE DESIGN */
+@media (max-width: 1024px) {
+  .intro-grid {
+    grid-template-columns: 1fr;
+    gap: 40px;
+    padding-top: 40px;
   }
-  .menu-trigger {
-    display: block;
-  }
-  .mobile-menu {
-    display: flex;
-    position: absolute;
-    top: 75px;
-    right: 5vw;
-    left: 5vw;
-    background: var(--paper);
-    color: var(--ink);
-    padding: 28px;
+  .collection-header {
     flex-direction: column;
-    gap: 20px;
-    z-index: 20;
-    font-family: var(--font-mono);
-    font-size: 12px;
-    text-transform: uppercase;
-    letter-spacing: 0.18em;
-    border: 1px solid var(--line);
-    border-radius: 4px;
-    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.2);
-  }
-  .mobile-menu a:hover {
-    color: var(--blue);
-  }
-  .hero-content {
-    margin-bottom: 12vh;
-  }
-  .section-pad {
-    padding: 95px 6vw;
+    align-items: flex-start;
+    gap: 28px;
+    margin-bottom: 40px;
   }
   .collection-grid {
     grid-template-columns: 1fr 1fr;
+    gap: 24px;
   }
   .collection-card.card-1 {
-    grid-row: span 2;
+    grid-row: auto;
   }
   .collection-card.card-2 {
-    margin-top: 70px;
+    margin-top: 0;
   }
   .collection-card.card-3 {
     margin-top: 0;
   }
   .product-grid {
     grid-template-columns: 1fr 1fr;
+    gap: 20px;
   }
-  .brand-intro {
+  .brand-grid {
+    grid-template-columns: 1fr;
+    gap: 44px;
+    margin-top: 36px;
+  }
+  .story-container {
+    grid-template-columns: 1fr;
+    gap: 40px;
+  }
+  .cta-container {
+    grid-template-columns: 1fr;
+    gap: 36px;
+  }
+}
+
+@media (max-width: 768px) {
+  .hero {
+    min-height: 100svh;
+    padding: 0 5vw;
+  }
+  .hero-video {
+    inset: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+    object-position: 36% 62% !important;
+  }
+  .hero-wash {
+    background: 
+      linear-gradient(180deg, rgba(12, 16, 22, 0.85) 0%, rgba(12, 16, 22, 0.25) 45%, rgba(12, 16, 22, 0.75) 100%) !important;
+  }
+  .section-pad {
+    padding: 60px 5vw;
+  }
+  .section-kicker {
+    grid-template-columns: 32px 1fr;
+    gap: 10px;
+    margin-bottom: 30px;
+    padding: 14px 0;
+    font-size: 9px;
+  }
+  .section-kicker span:last-child {
+    display: none;
+  }
+  .hero-content {
+    margin-bottom: 8vh;
+  }
+  .hero h1 {
+    font-size: clamp(2.4rem, 8.5vw, 4.2rem);
+    line-height: 1.05;
+  }
+  .intro-grid h2,
+  .section-heading h2,
+  .products-heading h2,
+  .brand-editorial h2,
+  .story-heading,
+  .cta-heading {
+    font-size: clamp(2rem, 7vw, 3.2rem) !important;
+    line-height: 1.08;
+  }
+  .intro-stats {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+  }
+  .intro-stat-card {
+    padding: 14px 10px;
+  }
+  .intro-stat-card strong {
+    font-size: 20px;
+  }
+  .intro-stat-card span {
+    font-size: 8px;
+  }
+  .collection-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+  .collection-card,
+  .collection-card.card-2,
+  .collection-card.card-3 {
+    min-height: 380px;
+    width: 100%;
+    margin: 0 !important;
+  }
+  .brand-container {
+    padding: 0 5vw 50px;
+  }
+  .brand-cards-grid {
     grid-template-columns: 1fr 1fr;
+    gap: 12px;
   }
-  .brand-intro .brand-copy {
-    grid-column: 2;
+  .product-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+  }
+  .products-heading {
+    margin: 40px 0 24px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
   }
   .cursor-dot, .cursor-ring {
     display: none;
   }
 }
 
-@media (max-width: 600px) {
-  .nav-bar {
-    padding: 20px 5vw;
+@media (max-width: 520px) {
+  .hero {
+    padding: 0 4vw;
   }
-  .nav-actions {
-    gap: 12px;
-  }
-  .nav-actions button:nth-child(2),
-  .nav-actions button:nth-child(3) {
-    display: none;
+  .hero-video {
+    object-position: 34% 58% !important;
   }
   .hero h1 {
-    font-size: 18vw;
+    font-size: clamp(2rem, 9.5vw, 3rem);
+    letter-spacing: -0.03em;
   }
   .hero-copy {
-    font-size: 14px;
-    max-width: 320px;
+    font-size: 13.5px;
+    max-width: 100%;
   }
   .hero-ctas {
-    align-items: flex-start;
     flex-direction: column;
-    gap: 20px;
+    align-items: center;
+    gap: 14px;
+    width: 100%;
+    margin-top: 24px;
+  }
+  .hero-ctas .button {
+    width: auto;
+    min-width: 250px;
+    max-width: 320px;
+    border-radius: 9999px !important;
+    padding: 14px 28px;
+    justify-content: center;
+    text-align: center;
+  }
+  .hero-ctas .text-link {
+    width: auto;
+    justify-content: center;
+    text-align: center;
+    color: #ffffff !important;
+    padding: 6px 12px;
+  }
+  .hero-ctas .text-link svg {
+    color: #ff99ac !important;
+  }
+  .hero-meta {
+    font-size: 8px;
+    padding-bottom: 16px;
   }
   .hero-meta span:nth-child(2) {
     display: none;
   }
-  .hero-meta {
-    padding-bottom: 20px;
+  .intro-stats {
+    grid-template-columns: 1fr;
+    gap: 8px;
   }
-  .section-pad {
-    padding: 75px 6vw;
+  .intro-stat-card {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
   }
-  .section-kicker {
-    grid-template-columns: 30px 1fr;
+  .collection-meta-strip {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+    padding: 12px 14px;
+    width: 100%;
   }
-  .section-kicker span:last-child {
+  .meta-strip-divider {
     display: none;
   }
-  .intro-grid,
-  .story-section {
-    grid-template-columns: 1fr;
-    gap: 36px;
-    padding-top: 55px;
-  }
-  .intro-grid p {
-    align-self: auto;
-  }
-  .intro-grid h2,
-  .section-heading h2,
-  .products-heading h2,
-  .brand-intro h2,
-  .story-copy h2,
-  .cta-section h2 {
-    font-size: 13vw;
-  }
-  .collection-grid {
-    display: flex;
+  .collection-pill-tabs {
     flex-direction: column;
-    gap: 16px;
-  }
-  .collection-card,
-  .collection-card.card-2,
-  .collection-card.card-3 {
-    min-height: 420px;
     width: 100%;
-    margin: 0;
+    gap: 6px;
   }
-  .products-heading {
-    margin: 50px 0 35px;
-    align-items: start;
-    flex-direction: column;
-    gap: 20px;
+  .collection-pill-tab {
+    width: 100%;
+    justify-content: space-between;
   }
   .product-grid {
     grid-template-columns: 1fr;
-    gap: 20px;
-  }
-  .product-info {
-    display: flex;
+    gap: 16px;
   }
   .quick-add {
     opacity: 1;
@@ -2428,24 +2634,63 @@ button {
   }
   .quick-add button {
     padding: 11px;
-    font-size: 9px;
+    font-size: 10px;
   }
-  .brand-intro {
-    display: block;
+  .brand-cards-grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
   }
-  .brand-copy {
-    margin-top: 30px;
+  .brand-stats-row {
+    gap: 14px;
+    justify-content: space-between;
   }
-  .story-image {
+  .story-image-frame {
     aspect-ratio: 1;
   }
+  .story-ctas {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+    width: 100%;
+  }
+  .story-ctas .button,
+  .story-ctas .text-link {
+    width: 100%;
+    justify-content: center;
+    text-align: center;
+  }
+  .story-meta-pills {
+    flex-wrap: wrap;
+    gap: 6px;
+  }
   .cta-section {
-    min-height: 70vh;
-    padding: 14vw 6vw;
+    min-height: auto;
+    padding: 60px 5vw;
+  }
+  .cta-actions {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+    width: 100%;
+  }
+  .cta-actions .button,
+  .cta-actions .cta-secondary-link {
+    width: 100%;
+    justify-content: center;
+    text-align: center;
+  }
+  .car-input-group {
+    flex-direction: column;
+    gap: 8px;
+  }
+  .car-vip-btn {
+    width: 100%;
+    justify-content: center;
+    padding: 10px;
   }
   .footer {
     grid-template-columns: 1fr;
-    padding: 40px 6vw;
+    padding: 40px 5vw;
   }
   .footer p {
     grid-column: 1 / -1;
